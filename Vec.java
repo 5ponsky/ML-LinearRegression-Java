@@ -238,8 +238,7 @@ class Tensor extends Vec {
 
 				// increment the kinner position
 				int i;
-				for(i = 0; i < dc; i++)
-				{
+				for(i = 0; i < dc; i++) {
 					kinner[i]++;
 					ip += stepInner[i];
 					fp += stepFilter[i];
@@ -258,8 +257,7 @@ class Tensor extends Vec {
 
 			// increment the kouter position
 			int i;
-			for(i = 0; i < dc; i++)
-			{
+			for(i = 0; i < dc; i++) {
 				kouter[i]++;
 				op += stepOuter[i];
 				ip += stride * stepInner[i];
@@ -275,8 +273,8 @@ class Tensor extends Vec {
 	}
 
 	/// Throws an exception if something is wrong.
-	static void test()
-	{
+	static void test() {
+
 		{
 			// 1D test
 			Vec in = new Vec(new double[]{2,3,1,0,1});
@@ -299,22 +297,20 @@ class Tensor extends Vec {
 
 		{
 			// 2D test
-			Vec in = new Vec(new double[]
-				{
+			Vec in = new Vec(new double[] {
 					1, 2, 3,
 					4, 5, 6,
 					7, 8, 9
-				}
-			);
+			});
+
 			Tensor tin = new Tensor(in, new int[]{3, 3});
 
-			Vec k = new Vec(new double[]
-				{
+			Vec k = new Vec(new double[] {
 					1,  2,  1,
 					0,  0,  0,
 					-1, -2, -1
-				}
-			);
+			});
+
 			Tensor tk = new Tensor(k, new int[]{3, 3});
 
 			Vec out = new Vec(9);
@@ -322,13 +318,12 @@ class Tensor extends Vec {
 
 			Tensor.convolve(tin, tk, tout, false, 1);
 
-			Vec expected = new Vec(new double[]
-				{
+			Vec expected = new Vec(new double[] {
 					-13, -20, -17,
 					-18, -24, -18,
 					13,  20,  17
-				}
-			);
+			});
+
 			if(Math.sqrt(out.squaredDistance(expected)) > 1e-10)
 				throw new RuntimeException("wrong");
 		}
