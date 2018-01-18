@@ -7,15 +7,17 @@ import java.util.Iterator;
 import java.lang.StringBuilder;
 
 /// Represents a vector of doubles
-public class Vec
-{
+public class Vec {
 	protected double[] vals;
 	protected int start;
 	protected int len;
 
+	public int size() { return len; }
+	public double get(int index) { return vals[start + index]; }
+	public void set(int index, double value) { vals[start + index] = value; }
+
 	/// Makes an vector of the specified size
-	public Vec(int size)
-	{
+	public Vec(int size) {
 		if(size == 0)
 			vals = null;
 		else
@@ -25,24 +27,21 @@ public class Vec
 	}
 
 	/// Wraps the specified array of doubles
-	public Vec(double[] data)
-	{
+	public Vec(double[] data) {
 		vals = data;
 		start = 0;
 		len = data.length;
 	}
 
 	/// This is NOT a copy constructor. It wraps the same buffer of values as v.
-	public Vec(Vec v, int begin, int length)
-	{
+	public Vec(Vec v, int begin, int length) {
 		vals = v.vals;
 		start = v.start + begin;
 		len = length;
 	}
 
 	/// Unmarshalling constructor
-	public Vec(Json n)
-	{
+	public Vec(Json n) {
 		vals = new double[n.size()];
 		for(int i = 0; i < n.size(); i++)
 			vals[i] = n.getDouble(i);
@@ -50,27 +49,11 @@ public class Vec
 		len = n.size();
 	}
 
-	public Json marshal()
-	{
+	public Json marshal() {
 		Json list = Json.newList();
 		for(int i = 0; i < len; i++)
 			list.add(vals[start + i]);
 		return list;
-	}
-
-	public int size()
-	{
-		return len;
-	}
-
-	public double get(int index)
-	{
-		return vals[start + index];
-	}
-
-	public void set(int index, double value)
-	{
-		vals[start + index] = value;
 	}
 
 	public void fill(double val)
@@ -79,32 +62,30 @@ public class Vec
 			vals[start + i] = val;
 	}
 
-	public String toString()
-	{
+	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		if(len > 0)
-		{
+
+		if(len > 0) {
 			sb.append(Double.toString(vals[start]));
-			for(int i = 1; i < len; i++)
-			{
+			for(int i = 1; i < len; i++) {
 				sb.append(",");
 				sb.append(Double.toString(vals[start + i]));
 			}
 		}
+
 		return sb.toString();
 	}
 
-	public double squaredMagnitude()
-	{
+	public double squaredMagnitude() {
 		double d = 0.0;
 		for(int i = 0; i < len; i++)
 			d += vals[start + i] * vals[start + i];
 		return d;
 	}
 
-	public void normalize()
-	{
+	public void normalize() {
 		double mag = squaredMagnitude();
+
 		if(mag <= 0.0) {
 			fill(0.0);
 			vals[0] = 1.0;
@@ -115,8 +96,7 @@ public class Vec
 		}
 	}
 
-	public void copy(Vec that)
-	{
+	public void copy(Vec that) {
 		vals = new double[that.size()];
 		for(int i = 0; i < that.size(); i++)
 			vals[i] = that.get(i);
@@ -124,30 +104,26 @@ public class Vec
 		len = that.size();
 	}
 
-	public void add(Vec that)
-	{
+	public void add(Vec that) {
 		if(that.size() != this.size())
 			throw new IllegalArgumentException("mismatching sizes");
 		for(int i = 0; i < len; i++)
 			vals[start + i] += that.get(i);
 	}
 
-	public void scale(double scalar)
-	{
+	public void scale(double scalar) {
 		for(int i = 0; i < len; i++)
 			vals[start + i] *= scalar;
 	}
 
-	public void addScaled(double scalar, Vec that)
-	{
+	public void addScaled(double scalar, Vec that) {
 		if(that.size() != this.size())
 			throw new IllegalArgumentException("mismatching sizes");
 		for(int i = 0; i < len; i++)
 			vals[start + i] += scalar * that.get(i);
 	}
 
-	public double dotProduct(Vec that)
-	{
+	public double dotProduct(Vec that) {
 		if(that.size() != this.size())
 			throw new IllegalArgumentException("mismatching sizes");
 		double d = 0.0;
@@ -156,8 +132,7 @@ public class Vec
 		return d;
 	}
 
-	public double squaredDistance(Vec that)
-	{
+	public double squaredDistance(Vec that) {
 		if(that.size() != this.size())
 			throw new IllegalArgumentException("mismatching sizes");
 		double d = 0.0;
@@ -176,14 +151,12 @@ public class Vec
 
 
 /// A tensor class.
-class Tensor extends Vec
-{
+class Tensor extends Vec {
 	int[] dims;
 
 	/// General-purpose constructor. Example:
 	/// Tensor t(v, {5, 7, 3});
-	Tensor(Vec vals, int[] _dims)
-	{
+	Tensor(Vec vals, int[] _dims) {
 		super(vals, 0, vals.size());
 		dims = new int[_dims.length];
 		int tot = 1;
@@ -197,8 +170,7 @@ class Tensor extends Vec
 	}
 
 	/// Copy constructor. Copies the dimensions. Wraps the same vector.
-	Tensor(Tensor copyMe)
-	{
+	Tensor(Tensor copyMe) {
 		super((Vec)copyMe, 0, copyMe.size());
 		dims = new int[copyMe.dims.length];
 		for(int i = 0; i < copyMe.dims.length; i++)
@@ -209,8 +181,7 @@ class Tensor extends Vec
 	/// Padding is computed as necessary to fill the the out tensor.
 	/// filter is the filter to convolve with in.
 	/// If flipFilter is true, then the filter is flipped in all dimensions.
-	static void convolve(Tensor in, Tensor filter, Tensor out, boolean flipFilter, int stride)
-	{
+	static void convolve(Tensor in, Tensor filter, Tensor out, boolean flipFilter, int stride) {
 		// Precompute some values
 		int dc = in.dims.length;
 		if(dc != filter.dims.length)
@@ -350,7 +321,7 @@ class Tensor extends Vec
 			Tensor tout = new Tensor(out, new int[]{3, 3});
 
 			Tensor.convolve(tin, tk, tout, false, 1);
-			
+
 			Vec expected = new Vec(new double[]
 				{
 					-13, -20, -17,
