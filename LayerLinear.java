@@ -17,6 +17,8 @@ public class LayerLinear extends Layer {
     // vector 'weights' contains all values needed to fill both M and b
     // The number of elements in weights will be outputs + outputs*inputs
 
+    // M is our parameters, or weights ( M = weights)
+
     //activation =
 
     // Vec(Vec v, int begin, int length)

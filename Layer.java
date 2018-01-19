@@ -2,7 +2,7 @@ abstract class Layer
 {
 	protected Vec activation;
 
-	Layer(size_t inputs, size_t outputs)
+	Layer(int inputs, int outputs)
 	{
 		activation = new Vec(outputs);
 	}
