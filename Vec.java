@@ -56,12 +56,13 @@ public class Vec {
 		return list;
 	}
 
-	public void fill(double val)
-	{
+	// Add a new entry into a vector
+	public void fill(double val) {
 		for(int i = 0; i < len; i++)
 			vals[start + i] = val;
 	}
 
+	// Print the contents of a vector
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 
@@ -104,6 +105,7 @@ public class Vec {
 		len = that.size();
 	}
 
+	// Add two compatible vectors component-wise
 	public void add(Vec that) {
 		if(that.size() != this.size())
 			throw new IllegalArgumentException("mismatching sizes");
