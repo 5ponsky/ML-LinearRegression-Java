@@ -29,7 +29,7 @@ public class LayerLinear extends Layer {
 
   void ordinary_least_squares(Matrix x, Matrix y, Vec weights) {
     /// x are features
-    /// y are labels
+    /// y are labels 
 
 
     Vec averagedXVec = new Vec(x.rows());
