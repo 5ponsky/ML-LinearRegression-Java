@@ -31,24 +31,44 @@ public class LayerLinear extends Layer {
     /// x are features
     /// y are labels
 
-    Vec averagedYVec = new Vec(y.rows());
-    for(int i = 0; i < y.cols(); ++i) {
-      double yMean = y.columnMean(i);
-      for(int j = 0; j < y.rows(); ++j) {
-        double k = y.row(i).get(j);
-        averagedYVec.set(j, k);
-      }
-    }
 
     Vec averagedXVec = new Vec(x.rows());
     for(int i = 0; i < x.cols(); ++i) {
       double xMean = x.columnMean(i);
       for(int j = 0; j < x.rows(); ++j) {
-        // x.getattribute(i)
-        double k = x.row(i).get(j);
+        double k = x.row(i).get(j) - xMean;
         averagedXVec.set(j, k);
       }
+
+
     }
+
+    // Vec averagedYVec = new Vec(y.rows());
+    // for(int i = 0; i < y.cols(); ++i) {
+    //   double yMean = y.columnMean(i);
+    //   for(int j = 0; j < y.rows(); ++j) {
+    //     double k = y.row(i).get(j);
+    //     averagedYVec.set(j, k);
+    //   }
+    // }
+    //
+    // Vec averagedXVec = new Vec(x.rows());
+    // for(int i = 0; i < x.cols(); ++i) {
+    //   double xMean = x.columnMean(i);
+    //   for(int j = 0; j < x.rows(); ++j) {
+    //     // x.getattribute(i)
+    //     double k = x.row(i).get(j);
+    //     averagedXVec.set(j, k);
+    //   }
+    // }
+    //
+    // for(int i = 0; i < x.cols(); ++i) {
+    //   double yMean = y.columnMean(i);
+    //   double xMean = x.columnMean(i);
+    //   for(int j = 0; j < x.rows(); ++j) {
+    //     double product = x.row(i).get(j) * y.row(i).get(j);
+    //   }
+    // }
 
 
     // For each pattern in our data set
