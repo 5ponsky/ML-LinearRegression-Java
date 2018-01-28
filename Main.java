@@ -45,6 +45,33 @@ class Main
 		test(learner, "soy");
 	}
 
+	public static void testOLS() {
+
+		Matrix testFeatures = new Matrix();
+		testFeatures.newColumns(2);
+		double[] x1 = {0,1};
+		double[] x2 = {1,2};
+		double[] x3 = {2,0};
+		testFeatures.takeRow(x1);
+		testFeatures.takeRow(x2);
+		testFeatures.takeRow(x3);
+
+		Matrix testLabels = new Matrix();
+		testLabels.newColumns(1);
+		double[] y1 = {2};
+		double[] y2 = {0};
+		double[] y3 = {1};
+		testLabels.takeRow(y1);
+		testLabels.takeRow(y2);
+		testLabels.takeRow(y3);
+
+		//Vec weights = new Vec(testFeatures.rows() + (testFeatures.rows() * testFeatures.cols()));
+		Vec weights = new Vec(3);
+
+		LayerLinear ll = new LayerLinear(testFeatures.cols(), testLabels.cols());
+		ll.ordinary_least_squares(testFeatures, testLabels, weights);
+	}
+
 
 	public static void testLayer() {
 		double[] x = {0, 1, 2};
@@ -57,7 +84,9 @@ class Main
 	public static void main(String[] args)
 	{
 		//testLearner(new BaselineLearner());
-		testHousing(new BaselineLearner());
+		//testHousing(new BaselineLearner());
+		testOLS();
+
 		//testLearner(new RandomForest(50));
 	}
 }
