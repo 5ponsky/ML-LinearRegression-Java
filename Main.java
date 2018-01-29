@@ -2,6 +2,7 @@
 // The contents of this file are distributed under the CC0 license.
 // See http://creativecommons.org/publicdomain/zero/1.0/
 // ----------------------------------------------------------------
+import java.util.Random;
 
 class Main
 {
@@ -14,7 +15,7 @@ class Main
 		trainLabels.loadARFF(fn + "_train_lab.arff");
 
 		// Train the model
-		learner.train(trainFeatures, trainLabels); 
+		learner.train(trainFeatures, trainLabels);
 
 		// Load the test data
 		Matrix testFeatures = new Matrix();
@@ -28,18 +29,18 @@ class Main
 	}
 
 	static void testRegression(SupervisedLearner learner) {
+		Random random = new Random(1234);
+
 		// Load the training data
 		Matrix featureData = new Matrix();
 		featureData.loadARFF("data/housing_features.arff");
 		Matrix labelData = new Matrix();
 		labelData.loadARFF("data/housing_labels.arff");
 
-		// Train the model
-		//learner.train(trainFeatures, trainLabels);
-
 		// Cross-Validation indices
+		int repititions = 5;
 		int folds = 10;
-		double foldRatio = 1.0 / folds;
+		double foldRatio = 1.0 / (double)folds;
 		int beginStep = 0;
 		int endStep = 1;
 		int length = featureData.rows();
@@ -47,67 +48,66 @@ class Main
 		int beginIndex = (int)((double)length * foldRatio * (double)beginStep);
 		int endIndex = (int)((double)length * foldRatio * (double)endStep);
 
-		// Create train matrix
+		// Create train matrices
 		Matrix trainFeatures = new Matrix((int)(featureData.rows() - featureData.rows()*foldRatio), featureData.cols());
 		Matrix trainLabels = new Matrix((int)(featureData.rows() - featureData.rows()*foldRatio), featureData.cols());
 
-		// Create test matrix
+		// Create test matrices
 		Matrix testFeatures = new Matrix((int)(featureData.rows()*foldRatio), featureData.cols());
 		Matrix testLabels = new Matrix((int)(featureData.rows()*foldRatio), labelData.cols());
 
+		// Partition the data by folds
+		double sse = 0; // Sum squared error
+		double mse = 0; // Mean squared error
+		double rmse = 0; // Root mean squared error
+		for(int k = 0; k < repititions; ++k) {
+			for(int i = beginStep; i < folds; ++i) {
+				int firstTrainBlockSize = beginIndex;
+				int secondTrainBlockSize = featureData.rows() - endIndex - 1;
 
-		//int destRow, int destCol, Matrix that,
-		//int rowBegin, int colBegin, int rowCount, int colCount
+				// First Training block
+				trainFeatures.copyBlock(0, 0, featureData, 0, 0, firstTrainBlockSize, 13);
+				trainLabels.copyBlock(0, 0, featureData, 0, 0, firstTrainBlockSize, 1);
 
-		// System.out.println("feature data rows " + featureData.rows());
-		// System.out.println("trainFeatures rows: " + trainFeatures.rows());
-		// System.out.println("trainLabels rows: " + trainLabels.rows());
-		// System.out.println("testFeatures rows: " + testFeatures.rows());
-		// System.out.println("testLabels rows: " + testLabels.rows() + "\n");
+				// Test block
+				testFeatures.copyBlock(0, 0, featureData, beginIndex, 0, testBlockSize, 13);
+				testLabels.copyBlock(0, 0, featureData, beginIndex, 0, testBlockSize, 1);
 
+				// 2nd Training block
+				trainFeatures.copyBlock(firstTrainBlockSize, 0, featureData,
+					firstTrainBlockSize + testBlockSize, 0, secondTrainBlockSize, 13);
+				trainLabels.copyBlock(firstTrainBlockSize, 0, featureData,
+					firstTrainBlockSize + testBlockSize, 0, secondTrainBlockSize, 1);
 
-		// Partition the data 5-fold
-		for(int i = beginStep; i < folds; ++i) {
-			int firstTrainBlockSize = beginIndex;
-			int secondTrainBlockSize = featureData.rows() - endIndex - 1;
+				learner.train(trainFeatures, trainLabels);
 
-			// System.out.println("Train 1st block: " + 0 + " to " + firstTrainBlockSize);
-			// System.out.println("test block " + beginIndex + " to " + endIndex);
-			// System.out.println("Train 2nd block: " +
-			// 	(firstTrainBlockSize + testBlockSize) + " to " + featureData.rows());
-			// System.out.println("test block size: " + testBlockSize);
-			// System.out.println("Train Size: " + (secondTrainBlockSize + firstTrainBlockSize));
-			// System.out.println("beginIndex: " + beginIndex);
-			// System.out.println("endIndex: " + endIndex);
+				sse = sse + learner.sum_squared_error(testFeatures, testLabels);
 
-			// First Training block
-			trainFeatures.copyBlock(0, 0, featureData, 0, 0, firstTrainBlockSize, 13);
-			// Test block
-			testFeatures.copyBlock(0, 0, featureData, beginIndex, 0, testBlockSize, 13);
-			testLabels.copyBlock(0, 0, featureData, beginIndex, 0, testBlockSize, 1);
-			// 2nd Training block
-			trainFeatures.copyBlock(firstTrainBlockSize, 0, featureData,
-				firstTrainBlockSize + testBlockSize, 0, secondTrainBlockSize, 13);
+				// Adjust the interval slicing
+				++beginStep;
+				++endStep;
+				beginIndex = testBlockSize * beginStep;
+				endIndex = testBlockSize * endStep;
+			}
 
-			trainLabels.copyBlock(0, 0, featureData, 0, 0, firstTrainBlockSize, 1);
-			trainLabels.copyBlock(firstTrainBlockSize, 0, featureData,
-				firstTrainBlockSize + testBlockSize, 0, secondTrainBlockSize, 1);
+			beginStep = 0;
+			endStep = 1;
+			beginIndex = (int)((double)length * foldRatio * (double)beginStep);
+			endIndex = (int)((double)length * foldRatio * (double)endStep);
 
-			System.out.println(" BREAK ");
+			mse = mse + (sse / (double)featureData.rows());
+			sse = 0;
 
-			learner.train(trainFeatures, trainLabels);
-
-			double misclassifications = learner.sum_squared_error(testFeatures, testLabels);
-			System.out.println("error?: " + misclassifications);
-
-
-			//
-			// Adjust the interval slicing
-			++beginStep;
-			++endStep;
-			beginIndex = testBlockSize * beginStep;
-			endIndex = testBlockSize * endStep;
+			for(int i = 0; i < featureData.rows(); ++i) {
+				int selectedRow = random.nextInt(featureData.rows());
+				int destinationRow = random.nextInt(featureData.rows());
+				featureData.swapRows(selectedRow, destinationRow);
+				labelData.swapRows(selectedRow, destinationRow);
+			}
 		}
+
+		rmse = Math.sqrt(mse / repititions);
+		System.out.println("RMSE: " + rmse);
 
 	}
 

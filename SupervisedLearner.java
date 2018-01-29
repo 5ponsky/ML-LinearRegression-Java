@@ -14,8 +14,6 @@ abstract class SupervisedLearner
 	/// Make a prediction
 	abstract Vec predict(Vec in);
 
-	double mis;
-
 	void cross_validation() {
 
 	}
@@ -23,7 +21,7 @@ abstract class SupervisedLearner
 	double sum_squared_error(Matrix features, Matrix labels) {
 		if(features.rows() != labels.rows())
 			throw new IllegalArgumentException("Mistmatching number of rows");
-
+			double mis = 0;
 			for(int i = 0; i < features.rows(); i++) {
 				Vec feat = features.row(i);
 				Vec pred = predict(feat);
@@ -32,7 +30,7 @@ abstract class SupervisedLearner
 					//Vec temp = new Vec(label.get(j));
 					//temp.addScaled(-1, pred.get(j));
 					//System.out.println(label.get(j).toString() + " " + pred.get(j).toString());
-					mis = mis + Math.pow(lab.get(j) - pred.get(j), 2);
+					mis = mis + (lab.get(j) - pred.get(j)) * (lab.get(j) - pred.get(j));
 					//System.out.println(mis);
 				}
 			}
