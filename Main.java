@@ -27,15 +27,166 @@ class Main
 		System.out.println("Misclassifications by " + learner.name() + " at " + challenge + " = " + Integer.toString(misclassifications) + "/" + Integer.toString(testFeatures.rows()));
 	}
 
-	static void testHousing(SupervisedLearner learner) {
+	static void testRegression(SupervisedLearner learner) {
 		// Load the training data
-		Matrix trainFeatures = new Matrix();
-		trainFeatures.loadARFF("data/housing_features.arff");
-		Matrix trainLabels = new Matrix();
-		trainLabels.loadARFF("data/housing_labels.arff");
+		Matrix featureData = new Matrix();
+		featureData.loadARFF("data/housing_features.arff");
+		Matrix labelData = new Matrix();
+		labelData.loadARFF("data/housing_labels.arff");
 
 		// Train the model
-		learner.train(trainFeatures, trainLabels);
+		//learner.train(trainFeatures, trainLabels);
+
+		// Cross-Validation indices
+		int folds = 10;
+		double foldRatio = 1.0 / folds;
+		int beginStep = 0;
+		int endStep = 1;
+		int length = featureData.rows();
+		int testBlockSize = (int)(length * foldRatio);
+		int beginIndex = (int)((double)length * foldRatio * (double)beginStep);
+		int endIndex = (int)((double)length * foldRatio * (double)endStep);
+
+		// Create train matrix
+		Matrix trainFeatures = new Matrix((int)(featureData.rows() - featureData.rows()*foldRatio), featureData.cols());
+		Matrix trainLabels = new Matrix((int)(featureData.rows() - featureData.rows()*foldRatio), featureData.cols());
+
+		// Create test matrix
+		Matrix testFeatures = new Matrix((int)(featureData.rows()*foldRatio), featureData.cols());
+		Matrix testLabels = new Matrix((int)(featureData.rows()*foldRatio), labelData.cols());
+
+
+		//int destRow, int destCol, Matrix that,
+		//int rowBegin, int colBegin, int rowCount, int colCount
+
+		// System.out.println("feature data rows " + featureData.rows());
+		// System.out.println("trainFeatures rows: " + trainFeatures.rows());
+		// System.out.println("trainLabels rows: " + trainLabels.rows());
+		// System.out.println("testFeatures rows: " + testFeatures.rows());
+		// System.out.println("testLabels rows: " + testLabels.rows() + "\n");
+
+
+		// Partition the data 5-fold
+		for(int i = beginStep; i < folds; ++i) {
+			int firstTrainBlockSize = beginIndex;
+			int secondTrainBlockSize = featureData.rows() - endIndex - 1;
+
+			// System.out.println("Train 1st block: " + 0 + " to " + firstTrainBlockSize);
+			// System.out.println("test block " + beginIndex + " to " + endIndex);
+			// System.out.println("Train 2nd block: " +
+			// 	(firstTrainBlockSize + testBlockSize) + " to " + featureData.rows());
+			// System.out.println("test block size: " + testBlockSize);
+			// System.out.println("Train Size: " + (secondTrainBlockSize + firstTrainBlockSize));
+			// System.out.println("beginIndex: " + beginIndex);
+			// System.out.println("endIndex: " + endIndex);
+
+			// First Training block
+			trainFeatures.copyBlock(0, 0, featureData, 0, 0, firstTrainBlockSize, 13);
+			// Test block
+			testFeatures.copyBlock(0, 0, featureData, beginIndex, 0, testBlockSize, 13);
+			testLabels.copyBlock(0, 0, featureData, beginIndex, 0, testBlockSize, 1);
+			// 2nd Training block
+			trainFeatures.copyBlock(firstTrainBlockSize, 0, featureData,
+				firstTrainBlockSize + testBlockSize, 0, secondTrainBlockSize, 13);
+
+			trainLabels.copyBlock(0, 0, featureData, 0, 0, firstTrainBlockSize, 1);
+			trainLabels.copyBlock(firstTrainBlockSize, 0, featureData,
+				firstTrainBlockSize + testBlockSize, 0, secondTrainBlockSize, 1);
+
+			System.out.println(" BREAK ");
+
+			learner.train(trainFeatures, trainLabels);
+
+			double misclassifications = learner.sum_squared_error(testFeatures, testLabels);
+			System.out.println("error?: " + misclassifications);
+
+
+			//
+			// Adjust the interval slicing
+			++beginStep;
+			++endStep;
+			beginIndex = testBlockSize * beginStep;
+			endIndex = testBlockSize * endStep;
+		}
+
+	}
+
+	static void testHousing(SupervisedLearner learner) {
+		// Load the training data
+		Matrix featureData = new Matrix();
+		featureData.loadARFF("data/housing_features.arff");
+		Matrix labelData = new Matrix();
+		labelData.loadARFF("data/housing_labels.arff");
+
+		// Train the model
+		//learner.train(trainFeatures, trainLabels);
+
+		// Cross-Validation indices
+		int folds = 10;
+		double foldRatio = 1.0 / folds;
+		int beginStep = 0;
+		int endStep = 1;
+		int length = featureData.rows();
+		int testBlockSize = (int)(length * foldRatio);
+		int beginIndex = (int)((double)length * foldRatio * (double)beginStep);
+		int endIndex = (int)((double)length * foldRatio * (double)endStep);
+
+		// Create train matrix
+		Matrix trainFeatures = new Matrix((int)(featureData.rows() - featureData.rows()*foldRatio), featureData.cols());
+		Matrix trainLabels = new Matrix((int)(featureData.rows() - featureData.rows()*foldRatio), featureData.cols());
+
+		// Create test matrix
+		Matrix testFeatures = new Matrix((int)(featureData.rows()*foldRatio), featureData.cols());
+		Matrix testLabels = new Matrix((int)(featureData.rows()*foldRatio), labelData.cols());
+
+
+		//int destRow, int destCol, Matrix that,
+		//int rowBegin, int colBegin, int rowCount, int colCount
+
+		System.out.println("feature data rows " + featureData.rows());
+		System.out.println("trainFeatures rows: " + trainFeatures.rows());
+		System.out.println("trainLabels rows: " + trainLabels.rows());
+		System.out.println("testFeatures rows: " + testFeatures.rows());
+		System.out.println("testLabels rows: " + testLabels.rows() + "\n");
+
+
+		// Partition the data 5-fold
+		for(int i = beginStep; i < folds; ++i) {
+			int firstTrainBlockSize = beginIndex;
+			int secondTrainBlockSize = featureData.rows() - endIndex - 1;
+
+			System.out.println("Train 1st block: " + 0 + " to " + firstTrainBlockSize);
+			System.out.println("test block " + beginIndex + " to " + endIndex);
+			System.out.println("Train 2nd block: " +
+				(firstTrainBlockSize + testBlockSize) + " to " + featureData.rows());
+			System.out.println("test block size: " + testBlockSize);
+			System.out.println("Train Size: " + (secondTrainBlockSize + firstTrainBlockSize));
+			System.out.println("beginIndex: " + beginIndex);
+			System.out.println("endIndex: " + endIndex);
+
+			// First Training block
+			trainFeatures.copyBlock(0, 0, featureData, 0, 0, firstTrainBlockSize, 13);
+			// Test block
+			testFeatures.copyBlock(0, 0, featureData, beginIndex, 0, testBlockSize, 13);
+			testLabels.copyBlock(0, 0, featureData, beginIndex, 0, testBlockSize, 13);
+			// 2nd Training block
+			trainFeatures.copyBlock(firstTrainBlockSize, 0, featureData,
+				firstTrainBlockSize + testBlockSize, 0, secondTrainBlockSize, 13);
+
+			trainLabels.copyBlock(0, 0, featureData, 0, 0, firstTrainBlockSize, 13);
+			trainLabels.copyBlock(firstTrainBlockSize, 0, featureData,
+				firstTrainBlockSize + testBlockSize, 0, secondTrainBlockSize, 13);
+
+			System.out.println(" BREAK ");
+
+			//
+			// Adjust the interval slicing
+			++beginStep;
+			++endStep;
+			beginIndex = testBlockSize * beginStep;
+			endIndex = testBlockSize * endStep;
+		}
+
 	}
 
 	public static void testLearner(SupervisedLearner learner)
@@ -84,8 +235,8 @@ class Main
 	public static void main(String[] args)
 	{
 		//testLearner(new BaselineLearner());
-		//testHousing(new BaselineLearner());
-		testOLS();
+		testRegression(new BaselineLearner());
+		//testOLS();
 
 		//testLearner(new RandomForest(50));
 	}

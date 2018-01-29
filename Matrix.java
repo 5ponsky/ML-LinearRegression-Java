@@ -25,7 +25,7 @@ import java.util.Random;
 public class Matrix
 {
 	/// Used to represent elements in the matrix for which the value is not known.
-	public static final double UNKNOWN_VALUE = -1e308; 
+	public static final double UNKNOWN_VALUE = -1e308;
 
 	// Data
 	private ArrayList<double[]> m_data = new ArrayList<double[]>(); //matrix elements
@@ -43,7 +43,7 @@ public class Matrix
 	///    newColumn, or
 	///    copyMetaData
 	@SuppressWarnings("unchecked")
-	public Matrix() 
+	public Matrix()
 	{
 		this.m_filename    = "";
 		this.m_attr_name   = new ArrayList<String>();
@@ -167,7 +167,7 @@ public class Matrix
 				else if (upper.startsWith("@DATA"))
 				{
 					m_data.clear();
-					
+
 					while (s.hasNextLine())
 					{
 						lineNum++;
@@ -257,7 +257,7 @@ public class Matrix
 					os.print(attrValue(j, val));
 				}
 			}
-			
+
 			if (j + 1 < cols())
 				os.print(",");
 		}
@@ -290,7 +290,7 @@ public class Matrix
 					os.print(attrValue(j, val));
 				}
 			}
-			
+
 			if (j + 1 < cols())
 				os.print(",");
 		}
@@ -299,26 +299,26 @@ public class Matrix
 
 	/// Saves the matrix to an ARFF file
 	public void saveARFF(String filename)
-	{		
+	{
 		PrintWriter os = null;
-		
+
 		try
 		{
 			os = new PrintWriter(filename);
 			// Print the relation name, if one has been provided ('x' is default)
 			os.print("@RELATION ");
 			os.println(m_filename.isEmpty() ? "x" : m_filename);
-			
+
 			// Print each attribute in order
 			for (int i = 0; i < m_attr_name.size(); i++)
 			{
 				os.print("@ATTRIBUTE ");
-				
+
 				String attributeName = m_attr_name.get(i);
 				os.print(attributeName.isEmpty() ? "x" : attributeName);
-				
+
 				int vals = valueCount(i);
-				
+
 				if (vals == 0) os.println(" REAL");
 				else
 				{
@@ -331,7 +331,7 @@ public class Matrix
 					os.println("}");
 				}
 			}
-			
+
 			// Print the data
 			os.println("@DATA");
 			for (int i = 0; i < rows(); i++)
@@ -378,7 +378,7 @@ public class Matrix
 	{
 		m_data.clear();
 		m_attr_name = new ArrayList<String>(that.m_attr_name);
-		
+
 		// Make a deep copy of that.m_str_to_enum
 		m_str_to_enum = new ArrayList<HashMap<String, Integer>>();
 		for (HashMap<String, Integer> map : that.m_str_to_enum)
@@ -386,10 +386,10 @@ public class Matrix
 			HashMap<String, Integer> temp = new HashMap<String, Integer>();
 			for (Map.Entry<String, Integer> entry : map.entrySet())
 				temp.put(entry.getKey(), entry.getValue());
-			
+
 			m_str_to_enum.add(temp);
 		}
-		
+
 		// Make a deep copy of that.m_enum_to_string
 		m_enum_to_str = new ArrayList<HashMap<Integer, String>>();
 		for (HashMap<Integer, String> map : that.m_enum_to_str)
@@ -397,7 +397,7 @@ public class Matrix
 			HashMap<Integer, String> temp = new HashMap<Integer, String>();
 			for (Map.Entry<Integer, String> entry : map.entrySet())
 				temp.put(entry.getKey(), entry.getValue());
-			
+
 			m_enum_to_str.add(temp);
 		}
 	}
@@ -420,30 +420,30 @@ public class Matrix
 	{
 		m_data.clear();
 		String name = "col_" + cols();
-		
+
 		m_attr_name.add(name);
-		
+
 		HashMap<String, Integer> temp_str_to_enum = new HashMap<String, Integer>();
 		HashMap<Integer, String> temp_enum_to_str = new HashMap<Integer, String>();
-		
+
 		for (int i = 0; i < vals; i++)
 		{
 			String sVal = "val_" + i;
 			temp_str_to_enum.put(sVal, i);
 			temp_enum_to_str.put(i, sVal);
 		}
-		
+
 		m_str_to_enum.add(temp_str_to_enum);
 		m_enum_to_str.add(temp_enum_to_str);
 	}
-	
+
 
 	/// Adds a column to this matrix with 0 values (continuous data).
 	public void newColumn()
 	{
 		this.newColumn(0);
 	}
-	
+
 
 	/// Adds n columns to this matrix, each with 0 values (continuous data).
 	public void newColumns(int n)
@@ -533,7 +533,7 @@ public class Matrix
 
 	/// Returns the name of the specified value
 	public String attrValue(int attr, int val)
-	{		
+	{
 		String value = m_enum_to_str.get(attr).get(val);
 		if (value == null)
 			throw new IllegalArgumentException("No name");
@@ -613,7 +613,7 @@ public class Matrix
 				count++;
 			}
 		}
-		
+
 		return sum / count;
 	}
 
@@ -628,7 +628,7 @@ public class Matrix
 			if (val != UNKNOWN_VALUE)
 				min = Math.min(min, val);
 		}
-		
+
 		return min;
 	}
 
@@ -643,7 +643,7 @@ public class Matrix
 			if (val != UNKNOWN_VALUE)
 				max = Math.max(max, val);
 		}
-		
+
 		return max;
 	}
 
@@ -659,11 +659,11 @@ public class Matrix
 			{
 				Integer result = counts.get(val);
 				if (result == null) result = 0;
-				
+
 				counts.put(val, result + 1);
 			}
 		}
-		
+
 		int valueCount = 0;
 		double value   = 0;
 		for (Map.Entry<Double, Integer> entry : counts.entrySet())
@@ -674,7 +674,7 @@ public class Matrix
 				valueCount = entry.getValue();
 			}
 		}
-		
+
 		return value;
 	}
 
@@ -683,9 +683,9 @@ public class Matrix
 	public void copyBlock(int destRow, int destCol, Matrix that, int rowBegin, int colBegin, int rowCount, int colCount)
 	{
 		if (destRow + rowCount > this.rows() || destCol + colCount > this.cols())
-			throw new IllegalArgumentException("Out of range for destination matrix.");
+			throw new IllegalArgumentException("01. Out of range for destination matrix.");
 		if (rowBegin + rowCount > that.rows() || colBegin + colCount > that.cols())
-			throw new IllegalArgumentException("Out of range for source matrix.");
+			throw new IllegalArgumentException("02. Out of range for source matrix.");
 
 		// Copy the specified region of meta-data
 		for (int i = 0; i < colCount; i++)
@@ -759,7 +759,7 @@ public class Matrix
 		int c = cols();
 		if (that.cols() != c)
 			throw new IllegalArgumentException("Matrices have different number of columns.");
-		
+
 		for (int i = 0; i < c; i++)
 		{
 			if (valueCount(i) != that.valueCount(i))
@@ -771,7 +771,7 @@ public class Matrix
 	{
 		int column;
 		boolean ascending;
-	
+
 		SortComparator(int col, boolean ascend)
 		{
 			column = col;
