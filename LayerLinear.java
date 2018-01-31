@@ -38,45 +38,65 @@ public class LayerLinear extends Layer {
 
     //
     // Subtract column averages from FEATURE matrix
-    averagedXMatrix.newColumns(x.rows()); // Has 100 columns
-    xCentroid.newColumns(x.cols()); // has 13 columns
-    double[] tempXCentroidCol = new double[x.cols()]; // size = 13
-    for(int i = 0; i < x.cols(); ++i) { // For each column in X, calculate the column avg
-      double xMean = x.columnMean(i);
-
-      double[] tempColumn = new double[x.rows()];
-      Arrays.fill(tempColumn, xMean);
-      tempXCentroidCol[i] = xMean;
-      averagedXMatrix.takeRow(tempColumn);
-    }
-    xCentroid.takeRow(tempXCentroidCol);
-
-    averagedXMatrix = averagedXMatrix.transpose();
-    x.addScaled(averagedXMatrix, -1.0);
-
+    // averagedXMatrix.newColumns(x.rows()); // Has 100 columns
+    // xCentroid.newColumns(x.cols()); // has 13 columns
+    // double[] tempXCentroidCol = new double[x.cols()]; // size = 13
+    // for(int i = 0; i < x.cols(); ++i) { // For each column in X, calculate the column avg
+    //   double xMean = x.columnMean(i);
     //
-    // Subtract column averages from LABEL matrix
-    averagedYMatrix.newColumns(y.rows());
-    yCentroid.newColumns(y.cols());
-    double[] tempYCentroidCol = new double[y.cols()];
+    //   double[] tempColumn = new double[x.rows()];
+    //   Arrays.fill(tempColumn, xMean);
+    //   tempXCentroidCol[i] = xMean;
+    //   averagedXMatrix.takeRow(tempColumn);
+    // }
+    // xCentroid.takeRow(tempXCentroidCol);
+    //
+    // averagedXMatrix = averagedXMatrix.transpose();
+    // x.addScaled(averagedXMatrix, -1.0);
+    for(int i = 0; i < x.cols(); ++i) {
+      double xMean = x.columnMean(i);
+      for(int j = 0; j < x.rows(); ++j) {
+        x.row(j).set(i, xMean);
+      }
+    }
+
     for(int i = 0; i < y.cols(); ++i) {
       double yMean = y.columnMean(i);
-
-      double[] tempColumn = new double[y.rows()];
-      tempYCentroidCol[i] = yMean;
-      Arrays.fill(tempColumn, yMean);
-      averagedYMatrix.takeRow(tempColumn);
+      for(int j = 0; j < y.rows(); ++j) {
+        y.row(j).set(i, yMean);
+      }
     }
-    yCentroid.takeRow(tempYCentroidCol);
 
-    y = y.transpose();
-    y.addScaled(averagedYMatrix, -1.0);
+    // //
+    // // Subtract column averages from LABEL matrix
+    // averagedYMatrix.newColumns(y.rows());
+    // yCentroid.newColumns(y.cols());
+    // double[] tempYCentroidCol = new double[y.cols()];
+    // for(int i = 0; i < y.cols(); ++i) {
+    //   double yMean = y.columnMean(i);
+    //
+    //   double[] tempColumn = new double[y.rows()];
+    //   tempYCentroidCol[i] = yMean;
+    //   Arrays.fill(tempColumn, yMean);
+    //   averagedYMatrix.takeRow(tempColumn);
+    // }
+    // yCentroid.takeRow(tempYCentroidCol);
+    //
+    // y = y.transpose();
+    // y.addScaled(averagedYMatrix, -1.0);
 
     //
     // Matrix multiplication for OLS
     System.out.println("y" + y.rows() + " " +y.cols());
     System.out.println("x" + x.rows() + " " +x.cols());
+
+
     Matrix featuresCrossLabels = Matrix.multiply(y, x, false, false); // heeeelp
+    for(int i = 0; i < x.rows(); ++i) {
+
+    }
+
+
     System.out.println("fcl" + featuresCrossLabels.rows() + " " +featuresCrossLabels.cols());
     Matrix xTranspose = new Matrix(x.transpose());
     Matrix featuresCrossFeatures = Matrix.multiply(xTranspose, x, false, false);
