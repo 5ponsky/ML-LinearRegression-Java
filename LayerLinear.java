@@ -74,7 +74,7 @@ public class LayerLinear extends Layer {
 
     //
     // Matrix multiplication for OLS
-    Matrix featuresCrossLabels = Matrix.multiply(y, x, false, false);
+    Matrix featuresCrossLabels = Matrix.multiply(y, x, false, false); // heeeelp
     Matrix xTranspose = x.transpose();
     Matrix featuresCrossFeatures = Matrix.multiply(xTranspose, x, false, false);
     Matrix fcfInverse = featuresCrossFeatures.pseudoInverse();
@@ -104,7 +104,7 @@ public class LayerLinear extends Layer {
       }
     }
 
-    
+
 
     // Adust inputs and outputs sizes
     //inputs = yCentroid.rows();

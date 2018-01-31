@@ -112,7 +112,7 @@ class Main
 	}
 
 	public static void testOLS2() {
-		LayerLinear ll = new LayerLinear(4, 8);
+		LayerLinear ll = new LayerLinear(13, 1);
 		Random random = new Random(1234);
 		Vec weights = new Vec(14);
 
@@ -133,8 +133,7 @@ class Main
 		for(int i = 0; i < y.rows(); ++i) {
 			ll.activate(weights, x.row(i));
 			for(int j = 0; j < ll.activation.size(); ++j) {
-				double temp = ll.activation.get(j);
-				System.out.println("here");
+				double temp = ll.activation.get(j) + random.nextGaussian();
 				y.row(i).set(j, temp);
 			}
 		}
@@ -142,6 +141,10 @@ class Main
 		for(int i = 0; i < y.rows(); ++i) {
     	System.out.println(y.row(i).toString());
 		}
+
+		Vec olsWeights = new Vec(14);
+		ll.ordinary_least_squares(x,y,olsWeights);
+
 
 	}
 
@@ -208,8 +211,9 @@ class Main
 	public static void main(String[] args)
 	{
 		//testLearner(new BaselineLearner());
-		testRegression(new BaselineLearner());
-		//testOLS2();
+		//testRegression(new BaselineLearner());
+		testOLS2();
+		//testLayer();
 		//test();
 
 		//testLearner(new RandomForest(50));
