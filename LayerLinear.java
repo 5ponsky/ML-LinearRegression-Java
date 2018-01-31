@@ -74,15 +74,24 @@ public class LayerLinear extends Layer {
 
     //
     // Matrix multiplication for OLS
+    System.out.println("y" + y.rows() + " " +y.cols());
+    System.out.println("x" + x.rows() + " " +x.cols());
     Matrix featuresCrossLabels = Matrix.multiply(y, x, false, false); // heeeelp
+    System.out.println("fcl" + featuresCrossLabels.rows() + " " +featuresCrossLabels.cols());
     Matrix xTranspose = new Matrix(x.transpose());
     Matrix featuresCrossFeatures = Matrix.multiply(xTranspose, x, false, false);
     Matrix fcfInverse = featuresCrossFeatures.pseudoInverse();
+    System.out.println("fcf" + featuresCrossFeatures.rows() + " " +featuresCrossFeatures.cols());
+    System.out.println("fcfI" + fcfInverse.rows() + " " +fcfInverse.cols());
     Matrix weightsMatrix = Matrix.multiply(featuresCrossLabels, fcfInverse, false, false);
 
     //
     // Calculate bias
+    System.out.println("wm" + weightsMatrix.rows() + " " +weightsMatrix.cols());
+    System.out.println("x" + xCentroid.rows() + " " +xCentroid.cols());
     Matrix mx = Matrix.multiply(weightsMatrix, xCentroid.transpose(), false, false);
+    System.out.println("y" + yCentroid.rows() + " " +yCentroid.cols());
+    System.out.println("y" + mx.rows() + " " +mx.cols());
     yCentroid.addScaled(mx, -1);
 
     //
@@ -120,10 +129,3 @@ public class LayerLinear extends Layer {
 
 
 }
-
-// System.out.println(weights.toString());
-// System.out.println("X-Centroid Rows: " + xCentroid.rows());
-// System.out.println("X-Centroid Columns: " + xCentroid.cols());
-// System.out.println("ycr " + yCentroid.rows() + " ycc " + yCentroid.cols());
-// System.out.println("xr " + averagedXMatrix.rows() + " xc " + averagedXMatrix.cols());
-// System.out.println("wr " + weightsMatrix.rows() + " wc " + weightsMatrix.cols());

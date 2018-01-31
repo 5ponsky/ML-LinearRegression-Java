@@ -8,6 +8,8 @@ public class NeuralNet extends SupervisedLearner {
 
   NeuralNet() {
     layers = new ArrayList<LayerLinear>();
+    layers.add(new LayerLinear(13, 13));
+    weights = new Vec(182);
 
   }
 
@@ -19,6 +21,7 @@ public class NeuralNet extends SupervisedLearner {
     //layers.add(new LayerLinear(in.size(), 1));
     layers.get(0).activate(weights, in);
     //System.out.println("activation: " + layers.get(0).activation.toString());
+    System.out.println(weights);
     return layers.get(0).activation;
   }
 
