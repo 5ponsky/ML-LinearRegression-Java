@@ -43,7 +43,7 @@ class Main
 		double foldRatio = 1.0 / (double)folds;
 		int beginStep = 0;
 		int endStep = 1;
-		int length = featureData.rows();
+		int length = featureData.rows() - 2;
 		int testBlockSize = (int)(length * foldRatio);
 		int beginIndex = (int)((double)length * foldRatio * (double)beginStep);
 		int endIndex = (int)((double)length * foldRatio * (double)endStep);
@@ -60,62 +60,108 @@ class Main
 		double sse = 0; // Sum squared error
 		double mse = 0; // Mean squared error
 		double rmse = 0; // Root mean squared error
+
+
+		//System.out.println("trainFeatures" + trainFeatures.rows());
+		//System.out.println("testFeatures" + testFeatures.rows());
+
 		for(int k = 0; k < repititions; ++k) {
-			for(int i = beginStep; i < folds; ++i) {
-				int firstTrainBlockSize = beginIndex;
-				int secondTrainBlockSize = featureData.rows() - endIndex - 1;
+			for(beginStep = 0; beginStep < folds; ++beginStep) {
+				beginIndex = beginStep * (length / folds);
+				endIndex = (beginStep + 1) * (length / folds);
+				//System.out.println("beginIndex " + beginIndex);
+				//System.out.println("endIndex " + endIndex);
 
 				// First Training block
-				trainFeatures.copyBlock(0, 0, featureData, 0, 0, firstTrainBlockSize, 13);
-				trainLabels.copyBlock(0, 0, featureData, 0, 0, firstTrainBlockSize, 1);
+				trainFeatures.copyBlock(0, 0, featureData, 0, 0, beginIndex, 13);
+				trainLabels.copyBlock(0, 0, featureData, 0, 0, beginIndex, 1);
 
 				// Test block
-				testFeatures.copyBlock(0, 0, featureData, beginIndex, 0, testBlockSize, 13);
-				testLabels.copyBlock(0, 0, featureData, beginIndex, 0, testBlockSize, 1);
+				testFeatures.copyBlock(0, 0, featureData, beginIndex+1, 0, endIndex-beginIndex, 13);
+				testLabels.copyBlock(0, 0, featureData, beginIndex+1, 0, endIndex-beginIndex, 1);
 
 				// 2nd Training block
-				trainFeatures.copyBlock(firstTrainBlockSize, 0, featureData,
-					firstTrainBlockSize + testBlockSize, 0, secondTrainBlockSize, 13);
-				trainLabels.copyBlock(firstTrainBlockSize, 0, featureData,
-					firstTrainBlockSize + testBlockSize, 0, secondTrainBlockSize, 1);
+				trainFeatures.copyBlock(beginIndex+1, 0, featureData,
+					beginIndex+1, 0, length - endIndex, 13);
+				trainLabels.copyBlock(beginIndex+1, 0, featureData,
+					beginIndex+1, 0, length - endIndex, 1);
+
+				// System.out.println("Tr-Block 1: " + 0 + " to " + firstTrainBlockSize);
+				// System.out.println("Te-Block: " + beginIndex + " to " + testBlockSize);
+				// System.out.println("Tr-Block 2: " + (firstTrainBlockSize+testBlockSize) + " to " + 505 + '\n');
 
 				learner.train(trainFeatures, trainLabels);
 
 				sse = sse + learner.sum_squared_error(testFeatures, testLabels);
-
-				// Adjust the interval slicing
-				++beginStep;
-				++endStep;
-				beginIndex = testBlockSize * beginStep;
-				endIndex = testBlockSize * endStep;
 			}
 
-			beginStep = 0;
-			endStep = 1;
-			beginIndex = (int)((double)length * foldRatio * (double)beginStep);
-			endIndex = (int)((double)length * foldRatio * (double)endStep);
-
-			mse = mse + (sse / (double)featureData.rows());
+			mse = mse + (sse / length);
 			sse = 0;
 
 			for(int i = 0; i < featureData.rows(); ++i) {
-				int selectedRow = random.nextInt(featureData.rows());
-				int destinationRow = random.nextInt(featureData.rows());
+				int selectedRow = random.nextInt(length);
+				int destinationRow = random.nextInt(length);
 				featureData.swapRows(selectedRow, destinationRow);
 				labelData.swapRows(selectedRow, destinationRow);
 			}
 		}
 
-		rmse = Math.sqrt(mse / repititions);
+		rmse = Math.sqrt(mse/repititions);
 		System.out.println("RMSE: " + rmse);
 
 	}
 
-	public static void testLearner(SupervisedLearner learner)
-	{
-		test(learner, "hep");
-		test(learner, "vow");
-		test(learner, "soy");
+	public static void testOLS2() {
+		LayerLinear ll = new LayerLinear(4, 8);
+		Random random = new Random(1234);
+		Vec weights = new Vec(14);
+
+		for(int i = 0; i < 14; ++i) {
+			weights.set(i, random.nextGaussian());
+		}
+
+		Matrix x = new Matrix(100, 13);
+		for(int i = 0; i < 100; ++i) {
+			double[] temp = new double[13];
+			for(int j = 0; j < 13; ++j) {
+				temp[j] = random.nextGaussian();
+			}
+			x.takeRow(temp);
+		}
+
+		Matrix y = new Matrix(100, 1);
+		for(int i = 0; i < y.rows(); ++i) {
+			ll.activate(weights, x.row(i));
+			for(int j = 0; j < ll.activation.size(); ++j) {
+				double temp = ll.activation.get(j);
+				System.out.println("here");
+				y.row(i).set(j, temp);
+			}
+		}
+
+		for(int i = 0; i < y.rows(); ++i) {
+    	System.out.println(y.row(i).toString());
+		}
+
+	}
+
+	public static void test() {
+		Matrix test = new Matrix();
+		test.newColumns(3);
+		double[] x1 = {1, 2, 3};
+		double[] x2 = {3, 4, 5};
+		double[] x3 = {6, 7, 8};
+		test.takeRow(x1);
+		test.takeRow(x2);
+		test.takeRow(x3);
+
+		for(int i = 0; i < test.rows(); i++) {
+			test.row(i).set(i, -1);
+		}
+
+		for(int i = 0; i < test.rows(); i++) {
+			System.out.println(test.row(i).toString());
+		}
 	}
 
 	public static void testOLS() {
@@ -141,8 +187,13 @@ class Main
 		//Vec weights = new Vec(testFeatures.rows() + (testFeatures.rows() * testFeatures.cols()));
 		Vec weights = new Vec(3);
 
+		double[] t1 = {0,1};
+		Vec t = new Vec(t1);
+
 		LayerLinear ll = new LayerLinear(testFeatures.cols(), testLabels.cols());
 		ll.ordinary_least_squares(testFeatures, testLabels, weights);
+		ll.activate(weights, t);
+		//Vec labels = new Matrix
 	}
 
 
@@ -158,7 +209,8 @@ class Main
 	{
 		//testLearner(new BaselineLearner());
 		testRegression(new BaselineLearner());
-		//testOLS();
+		//testOLS2();
+		//test();
 
 		//testLearner(new RandomForest(50));
 	}

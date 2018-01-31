@@ -104,7 +104,7 @@ public class LayerLinear extends Layer {
       }
     }
 
-    System.out.println(weights.toString());
+    
 
     // Adust inputs and outputs sizes
     //inputs = yCentroid.rows();
@@ -112,10 +112,10 @@ public class LayerLinear extends Layer {
 
     //
     // Calculate Y given X
-    double[] temp = {0.0, 1.0};
-    Vec tX = new Vec(temp);
-    activate(weights, tX);
-    System.out.println(activation.toString());
+    //double[] temp = {0.0, 1.0};
+    //Vec tX = new Vec(temp);
+    //activate(weights, tX);
+    //System.out.println(activation.toString());
   }
 
 
