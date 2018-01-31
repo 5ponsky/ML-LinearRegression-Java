@@ -38,10 +38,10 @@ public class LayerLinear extends Layer {
 
     //
     // Subtract column averages from FEATURE matrix
-    averagedXMatrix.newColumns(x.rows());
-    xCentroid.newColumns(x.cols());
-    double[] tempXCentroidCol = new double[x.cols()];
-    for(int i = 0; i < x.cols(); ++i) {
+    averagedXMatrix.newColumns(x.rows()); // Has 100 columns
+    xCentroid.newColumns(x.cols()); // has 13 columns
+    double[] tempXCentroidCol = new double[x.cols()]; // size = 13
+    for(int i = 0; i < x.cols(); ++i) { // For each column in X, calculate the column avg
       double xMean = x.columnMean(i);
 
       double[] tempColumn = new double[x.rows()];
@@ -74,9 +74,13 @@ public class LayerLinear extends Layer {
 
     //
     // Matrix multiplication for OLS
+    System.out.println("yr: " + y.rows() + " yc " + y.cols());
+    System.out.println("xr: " + x.rows() + " xc " + x.cols());
     Matrix featuresCrossLabels = Matrix.multiply(y, x, false, false); // heeeelp
-    Matrix xTranspose = x.transpose();
+    System.out.println("FCLr: " + featuresCrossLabels.rows() + " FCLc " + featuresCrossLabels.cols());
+    Matrix xTranspose = new Matrix(x.transpose());
     Matrix featuresCrossFeatures = Matrix.multiply(xTranspose, x, false, false);
+    System.out.println("FCFr: " + featuresCrossFeatures.rows() + " FCFc " + featuresCrossFeatures.cols());
     Matrix fcfInverse = featuresCrossFeatures.pseudoInverse();
     Matrix weightsMatrix = Matrix.multiply(featuresCrossLabels, fcfInverse, false, false);
 

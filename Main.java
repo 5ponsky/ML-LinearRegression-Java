@@ -120,7 +120,8 @@ class Main
 			weights.set(i, random.nextGaussian());
 		}
 
-		Matrix x = new Matrix(100, 13);
+		Matrix x = new Matrix();
+		x.newColumns(13);
 		for(int i = 0; i < 100; ++i) {
 			double[] temp = new double[13];
 			for(int j = 0; j < 13; ++j) {
@@ -138,12 +139,16 @@ class Main
 			}
 		}
 
-		for(int i = 0; i < y.rows(); ++i) {
-    	System.out.println(y.row(i).toString());
+		for(int i = 0; i < weights.size(); ++i) {
+    	System.out.println(weights.get(i));
 		}
 
 		Vec olsWeights = new Vec(14);
 		ll.ordinary_least_squares(x,y,olsWeights);
+
+		for(int i = 0; i < olsWeights.size(); ++i) {
+			System.out.println(olsWeights.get(i));
+		}
 
 
 	}
@@ -211,8 +216,8 @@ class Main
 	public static void main(String[] args)
 	{
 		//testLearner(new BaselineLearner());
-		//testRegression(new BaselineLearner());
-		testOLS2();
+		testRegression(new BaselineLearner());
+		//testOLS2();
 		//testLayer();
 		//test();
 
