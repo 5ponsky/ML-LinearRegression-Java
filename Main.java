@@ -28,8 +28,9 @@ class Main
 		System.out.println("Misclassifications by " + learner.name() + " at " + challenge + " = " + Integer.toString(misclassifications) + "/" + Integer.toString(testFeatures.rows()));
 	}
 
-	static void testRegression(SupervisedLearner learner) {
-		Random random = new Random(1234);
+	public static void run(SupervisedLearner learner) {
+		int folds = 10;
+		int repititions = 5;
 
 		// Load the training data
 		Matrix featureData = new Matrix();
@@ -37,81 +38,37 @@ class Main
 		Matrix labelData = new Matrix();
 		labelData.loadARFF("data/housing_labels.arff");
 
-		// Cross-Validation indices
-		int repititions = 5;
-		int folds = 10;
-		double foldRatio = 1.0 / (double)folds;
-		int beginStep = 0;
-		int endStep = 1;
-		int length = featureData.rows() - 2;
-		int testBlockSize = (int)(length * foldRatio);
-		int beginIndex = (int)((double)length * foldRatio * (double)beginStep);
-		int endIndex = (int)((double)length * foldRatio * (double)endStep);
-
-		// Create train matrices
-		Matrix trainFeatures = new Matrix((int)(featureData.rows() - featureData.rows()*foldRatio), featureData.cols());
-		Matrix trainLabels = new Matrix((int)(featureData.rows() - featureData.rows()*foldRatio), featureData.cols());
-
-		// Create test matrices
-		Matrix testFeatures = new Matrix((int)(featureData.rows()*foldRatio), featureData.cols());
-		Matrix testLabels = new Matrix((int)(featureData.rows()*foldRatio), labelData.cols());
-
-		// Partition the data by folds
-		double sse = 0; // Sum squared error
-		double mse = 0; // Mean squared error
-		double rmse = 0; // Root mean squared error
-
-
-		//System.out.println("trainFeatures" + trainFeatures.rows());
-		//System.out.println("testFeatures" + testFeatures.rows());
-
-		for(int k = 0; k < repititions; ++k) {
-			for(beginStep = 0; beginStep < folds; ++beginStep) {
-				beginIndex = beginStep * (length / folds);
-				endIndex = (beginStep + 1) * (length / folds);
-				//System.out.println("beginIndex " + beginIndex);
-				//System.out.println("endIndex " + endIndex);
-
-				// First Training block
-				trainFeatures.copyBlock(0, 0, featureData, 0, 0, beginIndex, 13);
-				trainLabels.copyBlock(0, 0, featureData, 0, 0, beginIndex, 1);
-
-				// Test block
-				testFeatures.copyBlock(0, 0, featureData, beginIndex+1, 0, endIndex-beginIndex, 13);
-				testLabels.copyBlock(0, 0, featureData, beginIndex+1, 0, endIndex-beginIndex, 1);
-
-				// 2nd Training block
-				trainFeatures.copyBlock(beginIndex+1, 0, featureData,
-					beginIndex+1, 0, length - endIndex, 13);
-				trainLabels.copyBlock(beginIndex+1, 0, featureData,
-					beginIndex+1, 0, length - endIndex, 1);
-
-				// System.out.println("Tr-Block 1: " + 0 + " to " + firstTrainBlockSize);
-				// System.out.println("Te-Block: " + beginIndex + " to " + testBlockSize);
-				// System.out.println("Tr-Block 2: " + (firstTrainBlockSize+testBlockSize) + " to " + 505 + '\n');
-
-				learner.train(trainFeatures, trainLabels);
-
-				sse = sse + learner.sum_squared_error(testFeatures, testLabels);
-			}
-
-			mse = mse + (sse / length);
-			sse = 0;
-
-			for(int i = 0; i < featureData.rows(); ++i) {
-				int selectedRow = random.nextInt(length);
-				int destinationRow = random.nextInt(length);
-				featureData.swapRows(selectedRow, destinationRow);
-				labelData.swapRows(selectedRow, destinationRow);
-			}
-		}
-
-		rmse = Math.sqrt(mse/repititions);
+		double rmse = learner.cross_validation(repititions, folds, featureData, labelData);
 		System.out.println("RMSE: " + rmse);
+	}
+
+	public static void testCV(SupervisedLearner learner) {
+
+		Matrix f = new Matrix();
+		f.newColumns(1);
+		double[] f1 = {0};
+		double[] f2 = {0};
+		double[] f3 = {0};
+		f.takeRow(f1);
+		f.takeRow(f2);
+		f.takeRow(f3);
+
+		Matrix l = new Matrix();
+		l.newColumns(1);
+		double[] l1 = {2};
+		double[] l2 = {4};
+		double[] l3 = {6};
+		l.takeRow(l1);
+		l.takeRow(l2);
+		l.takeRow(l3);
+
+		double rmse = learner.cross_validation(1, 3, f, l);
+		System.out.println("RMSE: " + rmse);
+
 
 	}
 
-	public static void testOLS2() {
+	public static void testOLS() {
 		LayerLinear ll = new LayerLinear(13, 1);
 		Random random = new Random(1234);
 		Vec weights = new Vec(14);
@@ -139,6 +96,7 @@ class Main
 			}
 		}
 
+
 		for(int i = 0; i < weights.size(); ++i) {
     	System.out.println(weights.get(i));
 		}
@@ -146,62 +104,13 @@ class Main
 		Vec olsWeights = new Vec(14);
 		ll.ordinary_least_squares(x,y,olsWeights);
 
+		System.out.println("-----------------------------");
+
 		for(int i = 0; i < olsWeights.size(); ++i) {
 			System.out.println(olsWeights.get(i));
 		}
 
 
-	}
-
-	public static void test() {
-		Matrix test = new Matrix();
-		test.newColumns(3);
-		double[] x1 = {1, 2, 3};
-		double[] x2 = {3, 4, 5};
-		double[] x3 = {6, 7, 8};
-		test.takeRow(x1);
-		test.takeRow(x2);
-		test.takeRow(x3);
-
-		for(int i = 0; i < test.rows(); i++) {
-			test.row(i).set(i, -1);
-		}
-
-		for(int i = 0; i < test.rows(); i++) {
-			System.out.println(test.row(i).toString());
-		}
-	}
-
-	public static void testOLS() {
-
-		Matrix testFeatures = new Matrix();
-		testFeatures.newColumns(2);
-		double[] x1 = {0,1};
-		double[] x2 = {1,2};
-		double[] x3 = {2,0};
-		testFeatures.takeRow(x1);
-		testFeatures.takeRow(x2);
-		testFeatures.takeRow(x3);
-
-		Matrix testLabels = new Matrix();
-		testLabels.newColumns(1);
-		double[] y1 = {2};
-		double[] y2 = {0};
-		double[] y3 = {1};
-		testLabels.takeRow(y1);
-		testLabels.takeRow(y2);
-		testLabels.takeRow(y3);
-
-		//Vec weights = new Vec(testFeatures.rows() + (testFeatures.rows() * testFeatures.cols()));
-		Vec weights = new Vec(3);
-
-		double[] t1 = {0,1};
-		Vec t = new Vec(t1);
-
-		LayerLinear ll = new LayerLinear(testFeatures.cols(), testLabels.cols());
-		ll.ordinary_least_squares(testFeatures, testLabels, weights);
-		ll.activate(weights, t);
-		//Vec labels = new Matrix
 	}
 
 
@@ -216,10 +125,12 @@ class Main
 	public static void main(String[] args)
 	{
 		//testLearner(new BaselineLearner());
-		testRegression(new BaselineLearner());
-		//testOLS2();
+		//testRegression(new BaselineLearner());
+		//testOLS();
 		//testLayer();
 		//test();
+		run(new NeuralNet());
+		//testCV(new BaselineLearner());
 
 		//testLearner(new RandomForest(50));
 	}

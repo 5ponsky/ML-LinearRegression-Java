@@ -74,13 +74,9 @@ public class LayerLinear extends Layer {
 
     //
     // Matrix multiplication for OLS
-    System.out.println("yr: " + y.rows() + " yc " + y.cols());
-    System.out.println("xr: " + x.rows() + " xc " + x.cols());
     Matrix featuresCrossLabels = Matrix.multiply(y, x, false, false); // heeeelp
-    System.out.println("FCLr: " + featuresCrossLabels.rows() + " FCLc " + featuresCrossLabels.cols());
     Matrix xTranspose = new Matrix(x.transpose());
     Matrix featuresCrossFeatures = Matrix.multiply(xTranspose, x, false, false);
-    System.out.println("FCFr: " + featuresCrossFeatures.rows() + " FCFc " + featuresCrossFeatures.cols());
     Matrix fcfInverse = featuresCrossFeatures.pseudoInverse();
     Matrix weightsMatrix = Matrix.multiply(featuresCrossLabels, fcfInverse, false, false);
 
