@@ -96,7 +96,6 @@ abstract class SupervisedLearner
 			Vec feat = features.row(i);
 			Vec pred = predict(feat);
 			Vec lab = labels.row(i);
-			//System.out.println(pred.toString());
 			for(int j = 0; j < lab.size(); j++) {
 				mis = mis + (lab.get(j) - pred.get(j)) * (lab.get(j) - pred.get(j));
 			}

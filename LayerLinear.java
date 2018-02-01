@@ -33,10 +33,10 @@ public class LayerLinear extends Layer {
     System.out.println("y" + y.rows() + " " +y.cols());
     System.out.println("x" + x.rows() + " " +x.cols());
 
-    Matrix averagedXMatrix = new Matrix();
-    Matrix averagedYMatrix = new Matrix();
     Matrix xCentroid = new Matrix();
     Matrix yCentroid = new Matrix();
+    xCentroid.newColumns(x.cols());
+    yCentroid.newColumns(y.cols());
 
     //
     // Subtract column averages from FEATURE matrix
@@ -55,41 +55,27 @@ public class LayerLinear extends Layer {
     //
     // averagedXMatrix = averagedXMatrix.transpose();
     // x.addScaled(averagedXMatrix, -1.0);
+    double[] xRow = new double[x.cols()];
     for(int i = 0; i < x.cols(); ++i) {
       double xMean = x.columnMean(i);
+      xRow[i] = xMean;
       for(int j = 0; j < x.rows(); ++j) {
-        x.row(j).set(i, xMean);
+        double value = x.row(j).get(i) - xMean;
+        x.row(j).set(i, value);
       }
     }
+    xCentroid.takeRow(xRow);
 
+    double[] yRow = new double[y.cols()];
     for(int i = 0; i < y.cols(); ++i) {
       double yMean = y.columnMean(i);
+      yRow[i] = yMean;
       for(int j = 0; j < y.rows(); ++j) {
-        y.row(j).set(i, yMean);
+        double value = y.row(j).get(i) - yMean;
+        y.row(j).set(i, value);
       }
     }
-
-    // //
-    // // Subtract column averages from LABEL matrix
-    // averagedYMatrix.newColumns(y.rows());
-    // yCentroid.newColumns(y.cols());
-    // double[] tempYCentroidCol = new double[y.cols()];
-    // for(int i = 0; i < y.cols(); ++i) {
-    //   double yMean = y.columnMean(i);
-    //
-    //   double[] tempColumn = new double[y.rows()];
-    //   tempYCentroidCol[i] = yMean;
-    //   Arrays.fill(tempColumn, yMean);
-    //   averagedYMatrix.takeRow(tempColumn);
-    // }
-    // yCentroid.takeRow(tempYCentroidCol);
-    //
-    // y = y.transpose();
-    // y.addScaled(averagedYMatrix, -1.0);
-
-    //
-    // Matrix multiplication for OLS
-
+    yCentroid.takeRow(yRow);
 
     Matrix featuresCrossLabels = Matrix.multiply(y.transpose(), x, false, false); // heeeelp
 
@@ -112,6 +98,7 @@ public class LayerLinear extends Layer {
 
     //
     // Push the bias Matrix (yCentroid) and weightsMatrix into one long vector
+    System.out.println("weights: " + weights.size());
     int weightsIndex = 0;
     for(int i = 0; i < yCentroid.rows(); ++i) {
       Vec temp = yCentroid.row(i);
@@ -128,19 +115,6 @@ public class LayerLinear extends Layer {
         ++weightsIndex;
       }
     }
-
-
-
-    // Adust inputs and outputs sizes
-    //inputs = yCentroid.rows();
-    //outputs = weightsMatrix.cols();
-
-    //
-    // Calculate Y given X
-    //double[] temp = {0.0, 1.0};
-    //Vec tX = new Vec(temp);
-    //activate(weights, tX);
-    //System.out.println(activation.toString());
   }
 
 

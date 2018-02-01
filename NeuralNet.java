@@ -16,20 +16,20 @@ public class NeuralNet extends SupervisedLearner {
 
   Vec predict(Vec in) {
     layers.get(0).activate(weights, in);
-    System.out.println(weights);
-    weights = new Vec(layers.get(0).activation);
 
-    return weights;
+    return new Vec(layers.get(0).activation);
   }
 
   /// Train this supervised learner
   void train(Matrix features, Matrix labels) {
-    System.out.println("y: " + labels.rows() + " " + labels.cols());
     layers.clear();
     LayerLinear ll = new LayerLinear(features.cols(), labels.cols());
+    weights = new Vec(labels.cols() + (features.cols() * labels.cols()));
     layers.add(ll);
+
+
     for(int i = 0; i < layers.size(); ++i) {
-      layers.get(i).ordinary_least_squares(features, labels, weights);
+      layers.get(0).ordinary_least_squares(features, labels, weights);
     }
   }
 
