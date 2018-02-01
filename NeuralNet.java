@@ -8,9 +8,6 @@ public class NeuralNet extends SupervisedLearner {
 
   NeuralNet() {
     layers = new ArrayList<LayerLinear>();
-    layers.add(new LayerLinear(13, 13));
-    weights = new Vec(182);
-
   }
 
   String name() {
@@ -18,15 +15,19 @@ public class NeuralNet extends SupervisedLearner {
   }
 
   Vec predict(Vec in) {
-    //layers.add(new LayerLinear(in.size(), 1));
     layers.get(0).activate(weights, in);
-    //System.out.println("activation: " + layers.get(0).activation.toString());
     System.out.println(weights);
-    return layers.get(0).activation;
+    weights = new Vec(layers.get(0).activation);
+
+    return weights;
   }
 
   /// Train this supervised learner
   void train(Matrix features, Matrix labels) {
+    System.out.println("y: " + labels.rows() + " " + labels.cols());
+    layers.clear();
+    LayerLinear ll = new LayerLinear(features.cols(), labels.cols());
+    layers.add(ll);
     for(int i = 0; i < layers.size(); ++i) {
       layers.get(i).ordinary_least_squares(features, labels, weights);
     }

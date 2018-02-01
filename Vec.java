@@ -26,6 +26,14 @@ public class Vec {
 		len = size;
 	}
 
+	public Vec(Vec that) {
+		vals = new double[that.size()];
+		for(int i = 0; i < that.size(); i++)
+			vals[i] = that.get(i);
+		start = 0;
+		len = that.size();
+	}
+
 	/// Wraps the specified array of doubles
 	public Vec(double[] data) {
 		vals = data;

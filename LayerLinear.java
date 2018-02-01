@@ -30,6 +30,8 @@ public class LayerLinear extends Layer {
   void ordinary_least_squares(Matrix x, Matrix y, Vec weights) {
     /// x are features
     /// y are labels
+    System.out.println("y" + y.rows() + " " +y.cols());
+    System.out.println("x" + x.rows() + " " +x.cols());
 
     Matrix averagedXMatrix = new Matrix();
     Matrix averagedYMatrix = new Matrix();
@@ -87,15 +89,9 @@ public class LayerLinear extends Layer {
 
     //
     // Matrix multiplication for OLS
-    System.out.println("y" + y.rows() + " " +y.cols());
-    System.out.println("x" + x.rows() + " " +x.cols());
 
 
-    Matrix featuresCrossLabels = Matrix.multiply(y, x, false, false); // heeeelp
-    for(int i = 0; i < x.rows(); ++i) {
-
-    }
-
+    Matrix featuresCrossLabels = Matrix.multiply(y.transpose(), x, false, false); // heeeelp
 
     System.out.println("fcl" + featuresCrossLabels.rows() + " " +featuresCrossLabels.cols());
     Matrix xTranspose = new Matrix(x.transpose());

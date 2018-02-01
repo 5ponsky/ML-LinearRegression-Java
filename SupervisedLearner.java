@@ -30,7 +30,7 @@ abstract class SupervisedLearner
 
 		// Create train matrices
 		Matrix trainFeatures = new Matrix((int)(featureData.rows() - Math.floor(featureData.rows()*foldRatio)), featureData.cols());
-		Matrix trainLabels = new Matrix((int)(featureData.rows() - Math.floor(featureData.rows()*foldRatio)), featureData.cols());
+		Matrix trainLabels = new Matrix((int)(featureData.rows() - Math.floor(featureData.rows()*foldRatio)), labelData.cols());
 
 		// Create test matrices
 		Matrix testFeatures = new Matrix((int)(featureData.rows()*foldRatio), featureData.cols());
